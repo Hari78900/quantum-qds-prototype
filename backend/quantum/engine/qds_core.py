@@ -12,10 +12,6 @@ STATE_PLUS = (STATE_0 + STATE_1) / np.sqrt(2)
 STATE_MINUS = (STATE_0 - STATE_1) / np.sqrt(2)
 
 BELL_PHI_PLUS = (np.kron(STATE_0, STATE_0) + np.kron(STATE_1, STATE_1)) / np.sqrt(2)
-BELL_PSI_PLUS = (np.kron(STATE_0, STATE_1) + np.kron(STATE_1, STATE_0)) / np.sqrt(2)
-BELL_PHI_MINUS = (np.kron(STATE_0, STATE_0) - np.kron(STATE_1, STATE_1)) / np.sqrt(2)
-BELL_PSI_MINUS = (np.kron(STATE_0, STATE_1) - np.kron(STATE_0, STATE_1)) / np.sqrt(2)
-BELL_BASES = [BELL_PHI_PLUS, BELL_PSI_PLUS, BELL_PHI_MINUS, BELL_PSI_MINUS]
 
 class QuantumForensicsCore:
     def __init__(self, alpha=0.001, beta=0.001, p0=0.02, p1=0.25):
@@ -27,11 +23,11 @@ class QuantumForensicsCore:
     @staticmethod
     def evaluate_epr_steering(rho_shared: np.ndarray) -> float:
         corrs = [
-            np.real(np.trace(rho_shared @ np.kron(SIGMA_X, SIGMA_X))),
-            np.real(np.trace(rho_shared @ np.kron(SIGMA_Y, SIGMA_Y))),
-            np.real(np.trace(rho_shared @ np.kron(SIGMA_Z, SIGMA_Z)))
+            np.abs(np.real(np.trace(rho_shared @ np.kron(SIGMA_X, SIGMA_X)))),
+            np.abs(np.real(np.trace(rho_shared @ np.kron(SIGMA_Y, SIGMA_Y)))),
+            np.abs(np.real(np.trace(rho_shared @ np.kron(SIGMA_Z, SIGMA_Z))))
         ]
-        return float(np.abs(np.sum(corrs)) / np.sqrt(3))
+        return float(np.sum(corrs) / np.sqrt(3))
 
     @staticmethod
     def evaluate_peres_horodecki_negativity(rho: np.ndarray) -> float:
