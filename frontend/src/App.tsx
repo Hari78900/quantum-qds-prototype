@@ -277,7 +277,7 @@ export default function App() {
 
               <span style={{ color: "#94a3b8" }}>Repudiation Bound:</span>
               <span style={{ color: "#38bdf8", wordBreak: "break-word", fontSize: "11px", fontFamily: "monospace" }}>
-                {data?.multi_party_qds?.non_repudiation_bound || "ε_rep ≤ 1.42e-9 [exp(-2(s_v - s_a)² · M)]"}
+                {data?.multi_party_qds?.non_repudiation_bound || "ε_rep ≤ 1.40e-9 [exp(-2(s_v - s_a)² · M)] (M=6370)"}
               </span>
             </div>
           </div>
@@ -328,7 +328,7 @@ export default function App() {
 
               <span>Early Abort Status:</span>
               <span style={{ fontWeight: "bold", color: data?.sprt_parameters?.aborted_at_step ? "#f43f5e" : "#34d399" }}>
-                {data?.sprt_parameters?.aborted_at_step ? `ABORTED AT STEP ${data?.sprt_parameters?.aborted_at_step} (< 15 pulses)` : "NOMINAL (NO BREACH)"}
+                {data?.sprt_parameters?.aborted_at_step ? `ABORTED AT PULSE #${data?.sprt_parameters?.aborted_at_step} (THRESHOLD BREACHED)` : "NOMINAL (NO BREACH)"}
               </span>
 
               <span>Verification Latency:</span>

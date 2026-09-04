@@ -18,7 +18,10 @@ app.add_middleware(
 
 # Statistical constants for Wald SPRT
 P0 = 0.015  # H0: Channel depolarizing baseline noise (1.5%)
-P1 = 0.110  # H1: Malicious threshold / QBER abort bound (11.0%)
+P1 = 0.110
+S_A = 0.045
+S_V = 0.085
+M_PULSES = 6370  # H1: Malicious threshold / QBER abort bound (11.0%)
 ALPHA = 1e-4  # Type I error bound (False Abort)
 BETA = 1e-6   # Type II error bound (Missed Detection / Forgery Accept)
 A_BOUND = math.log((1.0 - BETA) / ALPHA)  # ~ 9.21
@@ -146,7 +149,7 @@ def run_full_qds_verification(req: VerificationRequest):
             "bob_local_test": "COMMITTED" if bob_accept else "REJECTED",
             "charlie_cross_test": "COMMITTED" if charlie_accept else "REJECTED",
             "transferability": "TRANSFERABLE" if (bob_accept and charlie_accept) else "NON_TRANSFERABLE",
-            "non_repudiation_bound": "ε_rep ≤ 1.42e-9 [exp(-2(s_v - s_a)² · M)]"
+            "non_repudiation_bound": "ε_rep ≤ 1.40e-9 [exp(-2(s_v - s_a)² · M)] (M=6370)"
         },
         "sprt_parameters": {
             "null_hypothesis_H0": f"p <= {P0 * 100}%% (Thermal/Birefringence noise)",
