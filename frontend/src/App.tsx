@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { ShieldAlert, ShieldCheck, Activity, Cpu, Radio, Lock, RefreshCw, Zap } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
@@ -19,6 +19,11 @@ interface TelemetryData {
   sprt_trajectory: { qubit: number; llr: number; upper: number; lower: number }[];
   eps_forge: string;
   interlock_valid: boolean;
+  interlock_authorized?: boolean;
+  interlock_status?: string;
+  classical_pki_status?: string;
+  quantum_channel_status?: string;
+  transaction_id?: string;
 }
 
 const BlochSphereCanvas = ({ vector }: { vector: { x: number; y: number; z: number; norm: number } }) => {
@@ -263,21 +268,36 @@ export default function App() {
             )}
           </div>
 
-          <div className="bg-slate-900 border border-slate-800 rounded-lg p-5">
-            <h2 className="text-sm font-bold text-slate-300 uppercase tracking-wider mb-2 flex items-center gap-2">
-              <Lock size={16} className="text-cyan-400" /> Channel Security Integrity
+                    <div className="bg-slate-900 border border-slate-800 rounded-lg p-5">
+            <h2 className="text-sm font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center justify-between">
+              <span className="flex items-center gap-2"><Lock size={16} className="text-cyan-400" /> Dual-Layer Hybrid Interlock</span>
+              <span className={data?.interlock_authorized ? "text-[10px] px-2 py-0.5 rounded font-bold bg-emerald-950 text-emerald-300 border border-emerald-800" : "text-[10px] px-2 py-0.5 rounded font-bold bg-rose-950 text-rose-300 border border-rose-800"}>
+                {data?.interlock_authorized ? 'SECURE COMMIT' : 'ABORT / ISOLATE'}
+              </span>
             </h2>
             <div className="space-y-2 text-xs">
               <div className="flex justify-between py-1 border-b border-slate-800">
-                <span className="text-slate-400">Classical-Quantum Interlocking:</span>
-                <span className={data?.interlock_valid ? "text-emerald-400 font-bold" : "text-rose-400 font-bold"}>
-                  {data?.interlock_valid ? "VERIFIED" : "TAMPERED"}
+                <span className="text-slate-400">Classical PKI Layer (RSA/ECDSA):</span>
+                <span className="text-cyan-400 font-semibold font-mono">
+                  {data?.classical_pki_status || 'VALID (RSA/ECDSA)'}
+                </span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-slate-800">
+                <span className="text-slate-400">Physical Quantum Channel:</span>
+                <span className={data?.quantum_channel_status?.includes('SECURE') ? 'text-emerald-400 font-semibold font-mono' : 'text-rose-400 font-semibold font-mono'}>
+                  {data?.quantum_channel_status || (data?.interlock_valid ? 'SECURE (NON-LOCAL)' : 'TAMPERED / BREACHED')}
                 </span>
               </div>
               <div className="flex justify-between py-1 border-b border-slate-800">
                 <span className="text-slate-400">LHS Polytope Convex Membership:</span>
-                <span className={data?.lhs_polytope_violation ? "text-emerald-400 font-bold" : "text-rose-400 font-bold"}>
-                  {data?.lhs_polytope_violation ? "NON-LOCAL (GENUINE)" : "CLASSICAL / COMPROMISED"}
+                <span className={data?.lhs_polytope_violation ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'}>
+                  {data?.lhs_polytope_violation ? 'NON-LOCAL (GENUINE)' : 'CLASSICAL / COMPROMISED'}
+                </span>
+              </div>
+              <div className="pt-1 text-[11px] font-mono text-slate-400 flex justify-between items-center">
+                <span>Interlock Decision:</span>
+                <span className={data?.interlock_authorized ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'}>
+                  {data?.interlock_status || (data?.interlock_valid ? 'DUAL_INTERLOCK_VERIFIED' : 'QUANTUM_MONOTONE_ABORT')}
                 </span>
               </div>
             </div>
