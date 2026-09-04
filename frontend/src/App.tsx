@@ -159,7 +159,7 @@ export default function App() {
             { id: "pns", label: "Photon-Number Splitting (PNS)" },
             { id: "coherent", label: "Coherent Multi-Pulse Entangled Probe" },
             { id: "mitm", label: "Classical Pauli Bit Tampering (MitM)" },
-            { id: "repudiation_test", label: "Signer Repudiation Test (Alice denial)" },
+            { id: "repudiation_test" | "replay_attack", label: "Signer Repudiation Test (Alice denial)" },
           ].map((item) => (
             <label key={item.id} style={{ display: "block", margin: "10px 0", cursor: "pointer", fontSize: "12px", color: attackMode === item.id ? "#38bdf8" : "#94a3b8" }}>
               <input
