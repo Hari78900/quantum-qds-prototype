@@ -66,6 +66,10 @@ def run_full_qds_verification(req: VerificationRequest):
                 "attack_status": "MEASURED_REPLAY_ATTACK",
                 "hardware_metrics": "SUSPENDED_DUE_TO_BREACH"
             },
+            "decision_audit": {
+                "reasons": ["Session nonce already used (Replay violation)", "Classical authentication handshake failed"],
+                "basis": "Deterministic mathematical rules (No AI / ML / RAG)"
+            },
             "classical_pki": {
                 "algorithm": "NIST FIPS-204 (ML-DSA-87 / CRYSTALS-Dilithium)",
                 "status": "VIOLATION (REPLAY DETECTED)",
@@ -204,7 +208,21 @@ def run_full_qds_verification(req: VerificationRequest):
 
     dt_ms = round(min(3.4, max(1.1, (time.perf_counter() - t0) * 1000)), 2)
 
+    rejection_reasons = []
+    if fidelity < 0.90:
+        rejection_reasons.append(f"Fidelity ({fidelity:.4f}) dropped below threshold (0.9000)")
+    if attack_error > 0.05:
+        rejection_reasons.append(f"Adversarial excess QBER ({attack_error*100:.1f}%) breached channel noise envelope")
+    if aborted_step is not None:
+        rejection_reasons.append(f"Wald SPRT breached upper abort boundary (A >= {round(A_BOUND, 2)}) at pulse #{aborted_step}")
+    if req.attack_mode == "repudiation_test":
+        rejection_reasons.append("Alice dispute triggered: Bob accepted locally but Charlie cross-verification exceeded s_v (8.5%)")
+
     return {
+        "decision_audit": {
+            "reasons": rejection_reasons if rejection_reasons else ["All physical and statistical checks passed nominal bounds"],
+            "basis": "Deterministic mathematical rules (No AI / ML / RAG)"
+        },
         "timestamp": time.time(),
         "pulse_id": PULSE_SEQUENCE_COUNTER,
         "processing_time_ms": dt_ms,

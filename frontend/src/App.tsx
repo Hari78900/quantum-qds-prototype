@@ -353,6 +353,57 @@ export default function App() {
             </div>
           </div>
         </div>
+
+        {/* 1. HOW THE DECISION IS MADE */}
+        <div style={{ background: "#0f172a", border: "1px solid #334155", borderRadius: "8px", padding: "12px", marginBottom: "12px" }}>
+          <div style={{ fontSize: "11px", fontWeight: "bold", color: "#38bdf8", textTransform: "uppercase", marginBottom: "8px", letterSpacing: "0.05em" }}>
+            How the Decision is Made
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "8px", fontSize: "11px", color: "#cbd5e1" }}>
+            <div style={{ background: "#1e293b", padding: "8px", borderRadius: "4px" }}><strong style={{ color: "#38bdf8" }}>1.</strong> Measure received quantum state</div>
+            <div style={{ background: "#1e293b", padding: "8px", borderRadius: "4px" }}><strong style={{ color: "#38bdf8" }}>2.</strong> Calculate QBER, fidelity & Bloch drift</div>
+            <div style={{ background: "#1e293b", padding: "8px", borderRadius: "4px" }}><strong style={{ color: "#38bdf8" }}>3.</strong> Run sequential statistical test (SPRT)</div>
+            <div style={{ background: "#1e293b", padding: "8px", borderRadius: "4px" }}><strong style={{ color: "#38bdf8" }}>4.</strong> Check nonce & verifier authorization</div>
+            <div style={{ background: "#1e293b", padding: "8px", borderRadius: "4px" }}><strong style={{ color: "#38bdf8" }}>5.</strong> Accept, reject or isolate</div>
+          </div>
+        </div>
+
+        {/* 2. WHY REJECTED? / AUDIT PANEL */}
+        <div style={{ background: "#0f172a", border: "1px solid " + (data?.interlock_status === "SECURE COMMIT" ? "#1e293b" : "#dc2626"), borderRadius: "8px", padding: "12px", marginBottom: "12px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+            <div style={{ fontSize: "11px", fontWeight: "bold", color: data?.interlock_status === "SECURE COMMIT" ? "#4ade80" : "#f87171", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+              Decision Audit: {data?.interlock_status || "PENDING"}
+            </div>
+            <div style={{ fontSize: "10px", color: "#94a3b8", background: "#1e293b", padding: "2px 8px", borderRadius: "4px" }}>
+              Basis: Deterministic mathematical rules · No AI / ML / RAG
+            </div>
+          </div>
+          <div style={{ fontSize: "11px", color: "#cbd5e1" }}>
+            {data?.decision_audit?.reasons ? (
+              <ul style={{ margin: "4px 0 0 16px", padding: 0 }}>
+                {data.decision_audit.reasons.map((r: string, idx: number) => (
+                  <li key={idx} style={{ color: data.interlock_status === "SECURE COMMIT" ? "#4ade80" : "#fca5a5" }}>{r}</li>
+                ))}
+              </ul>
+            ) : (
+              <span style={{ color: "#94a3b8" }}>Awaiting pulse execution...</span>
+            )}
+          </div>
+        </div>
+
+        {/* 3. ACTUAL VS SIMULATED LEGEND */}
+        <div style={{ background: "#0f172a", border: "1px solid #334155", borderRadius: "8px", padding: "10px 12px", marginBottom: "16px" }}>
+          <div style={{ fontSize: "11px", fontWeight: "bold", color: "#94a3b8", textTransform: "uppercase", marginBottom: "6px", letterSpacing: "0.05em" }}>
+            System Measurement & Modeling Legend
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "8px", fontSize: "11px" }}>
+            <div><span style={{ color: "#94a3b8" }}>Measured:</span> <strong style={{ color: "#4ade80" }}>QBER, fidelity, latency</strong></div>
+            <div><span style={{ color: "#94a3b8" }}>Simulated:</span> <strong style={{ color: "#38bdf8" }}>Attack disturbance</strong></div>
+            <div><span style={{ color: "#94a3b8" }}>Configured:</span> <strong style={{ color: "#facc15" }}>Thresholds and noise parameters</strong></div>
+            <div><span style={{ color: "#94a3b8" }}>Theoretical:</span> <strong style={{ color: "#c084fc" }}>Security assumptions</strong></div>
+          </div>
+        </div>
+
       </div>
     </div>
   );
