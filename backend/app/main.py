@@ -7,6 +7,21 @@ from pydantic import BaseModel
 
 app = FastAPI(title="Q-RATCHET Cryptographic & Quantum State Engine")
 
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+from starlette.requests import Request
+
+@app.exception_handler(RequestValidationError)
+async def debug_validation_error(request: Request, exc: RequestValidationError):
+    raw_body = await request.body()
+    print("\n--- [422 DEBUG] INCOMING PAYLOAD ---")
+    print(raw_body.decode(errors="replace"))
+    print("--- [422 DEBUG] VALIDATION ERRORS ---")
+    for err in exc.errors():
+        print(err)
+    print("------------------------------------\n")
+    return JSONResponse(status_code=422, content={"detail": exc.errors()})
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -45,18 +60,23 @@ class VerificationRequest(BaseModel):
 
 @app.post("/api/verify")
 def run_full_qds_verification(req: VerificationRequest):
+    if not isinstance(req.attack_mode, str) or req.attack_mode in ["0", 0, ""]:
+        req.attack_mode = "baseline"
+
     global PULSE_SEQUENCE_COUNTER, SEEN_NONCES
     PULSE_SEQUENCE_COUNTER += 1
     t0 = time.perf_counter()
 
     # Determine Nonce
-    effective_nonce = req.nonce if req.nonce else f"0x{PULSE_SEQUENCE_COUNTER:08X}f4a9b2"
+    effective_nonce = req.nonce if req.nonce else f"0x{PULSE_SEQUENCE_COUNTER:08X}{int(time.time()*1000)%0xFFFFFF:06x}"
 
     # ACTIVE REPLAY VALIDATION CHECK
-    if effective_nonce in SEEN_NONCES or req.attack_mode == "replay_attack":
+    if (req.attack_mode == "replay_attack" or (req.nonce is not None and effective_nonce in SEEN_NONCES)):
         dt_ms = round(max(0.45, (time.perf_counter() - t0) * 1000), 2)
         return {
-            "timestamp": time.time(),
+            "sprt_trajectory": trajectory,
+        "trajectory": trajectory,
+        "timestamp": time.time(),
             "pulse_id": PULSE_SEQUENCE_COUNTER,
             "processing_time_ms": dt_ms,
             "interlock_status": "REPLAY REJECTED",
@@ -240,6 +260,8 @@ def run_full_qds_verification(req: VerificationRequest):
             "replay_check": "NOMINAL (FRESH_PULSE_WINDOW)",
             "classical_signature_valid": True
         },
+        "sprt_trajectory": trajectory,
+        "trajectory": trajectory,
         "interlock_status": overall_badge,
         "interlock_decision": interlock_decision,
         "physics_metrics": {

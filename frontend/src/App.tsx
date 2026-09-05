@@ -10,12 +10,16 @@ export default function App() {
   const arrowRef = useRef<THREE.ArrowHelper | null>(null);
 
   const fetchVerification = async (state = eigenstate, attack = attackMode) => {
+    console.log("Triggered fetchVerification with:", state, attack);
     setLoading(true);
     try {
       const res = await fetch("http://localhost:8000/api/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ eigenstate: state, attack_mode: attack })
+        body: JSON.stringify({ 
+          eigenstate: typeof state === "string" ? state : "|+〉", 
+          attack_mode: (typeof attack === "string" && attack.length > 1) ? attack : "baseline" 
+        })
       });
       const json = await res.json();
       setData(json);
@@ -26,6 +30,7 @@ export default function App() {
   };
 
   useEffect(() => {
+    fetchVerification();
     fetchVerification(eigenstate, attackMode);
   }, [eigenstate, attackMode]);
 
@@ -159,7 +164,7 @@ export default function App() {
             { id: "pns", label: "Photon-Number Splitting (PNS)" },
             { id: "coherent", label: "Coherent Multi-Pulse Entangled Probe" },
             { id: "mitm", label: "Classical Pauli Bit Tampering (MitM)" },
-            { id: "repudiation_test" | "replay_attack", label: "Signer Repudiation Test (Alice denial)" },
+            { id: "repudiation_test", label: "Signer Repudiation Test (Alice denial)" },
           ].map((item) => (
             <label key={item.id} style={{ display: "block", margin: "10px 0", cursor: "pointer", fontSize: "12px", color: attackMode === item.id ? "#38bdf8" : "#94a3b8" }}>
               <input
